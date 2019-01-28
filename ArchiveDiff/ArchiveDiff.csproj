@@ -68,7 +68,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Logic\ArchiveComparer.cs" />
-    <Compile Include="Logic\DirectoryTreeTraverser.cs" />
+    <Compile Include="Logic\DirectoryTreeTraversal.cs" />
     <Compile Include="Logic\EnumeratorWithHasCurrent.cs" />
     <Compile Include="Logic\ComparisonRow.cs" />
     <Compile Include="Ui\DelegateCommand.cs" />

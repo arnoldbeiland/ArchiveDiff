@@ -8,72 +8,62 @@ using System.Windows.Media;
 
 namespace ArchiveDiff.Ui
 {
-    public class BaseVisibilityConverter : IValueConverter
+    public abstract class SimpleCastingConverter<T> : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public virtual object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var state = (ComparisonState)value;
+            if (value is T typedValue)
+                return Convert(typedValue);
+
+            return null;
+        }
+
+        public virtual object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return null;
+        }
+
+        protected abstract object Convert(T value);
+    }
+
+    public class BaseVisibilityConverter : SimpleCastingConverter<ComparisonState>
+    {
+        protected override object Convert(ComparisonState state)
+        {
             return state == ComparisonState.Added ? Visibility.Collapsed : Visibility.Visible;
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
-    public class CompVisibilityConverter : IValueConverter
+    public class CompVisibilityConverter : SimpleCastingConverter<ComparisonState>
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        protected override object Convert(ComparisonState state)
         {
-            var state = (ComparisonState)value;
             return state == ComparisonState.Deleted ? Visibility.Collapsed : Visibility.Visible;
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
-    public class IndentationToMarginConverter : IValueConverter
+    public class IndentationToMarginConverter : SimpleCastingConverter<int>
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        protected override object Convert(int level)
         {
-            var level = (int)value;
-
             return new Thickness(10 + 25 * (level - 1), 1, 5, 1);
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
     }
 
-    public class ItemTypeToImageSourceConverter : IValueConverter
+    public class ItemTypeToImageSourceConverter : SimpleCastingConverter<ItemType>
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        protected override object Convert(ItemType type)
         {
-            var type = (ItemType)value;
-
             return type == ItemType.Directory
                 ? "Images/folder.png"
                 : "Images/file.png";
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return null;
-        }
     }
 
-    public class StateBackgroundColorConverter : IValueConverter
+    public class StateBackgroundColorConverter : SimpleCastingConverter<ComparisonState>
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        protected override object Convert(ComparisonState state)
         {
-            var state = (ComparisonState)value;
-
             switch (state)
             {
                 case ComparisonState.Added:
@@ -88,14 +78,9 @@ namespace ArchiveDiff.Ui
 
             return null;
         }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return null;
-        }
     }
 
-    public class StateDisplayTextConverter : IValueConverter
+    public class StateDisplayTextConverter : SimpleCastingConverter<ComparisonState>
     {
         private static readonly Dictionary<ComparisonState, string> DisplayTexts = new Dictionary<ComparisonState, string>
         {
@@ -107,19 +92,12 @@ namespace ArchiveDiff.Ui
             [ComparisonState.WhitespacesChanged] = "WS"
         };
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        protected override object Convert(ComparisonState state)
         {
-            var state = (ComparisonState)value;
-
             if (DisplayTexts.TryGetValue(state, out var result))
                 return result;
             else
                 return state.ToString();
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

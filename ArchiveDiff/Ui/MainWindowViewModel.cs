@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -13,6 +12,9 @@ namespace ArchiveDiff.Ui
 {
     public class MainWindowViewModel : INotifyPropertyChanged, IDisposable
     {
+        private const string DefaultBaseHeader = "Base";
+        private const string DefaultCompHeader = "Compared";
+
         public ICommand OpenBase { get; set; }
         public ICommand OpenComp { get; set; }
         public ICommand Refresh { get; set; }
@@ -21,14 +23,14 @@ namespace ArchiveDiff.Ui
         public ICommand DropToBaseFile { get; set; }
         public ICommand DropToCompFile { get; set; }
 
-        private string _baseHeader = "Base"; 
+        private string _baseHeader = DefaultBaseHeader; 
         public string BaseHeader
         {
             get => _baseHeader;
             set { _baseHeader = value; NotifyChanged(); }
         }
 
-        private string _compHeader = "Compared";
+        private string _compHeader = DefaultCompHeader;
         public string CompHeader
         {
             get => _compHeader;
@@ -66,13 +68,13 @@ namespace ArchiveDiff.Ui
             _rows = new List<ComparisonRow>();
             _settings = new Settings();
 
-            OpenBase = new DelegateCommand(ExceptionCatchWrapper(ChangeBaseFile));
-            OpenComp = new DelegateCommand(ExceptionCatchWrapper(ChangeCompFile));
+            OpenBase = new DelegateCommand(ExceptionCatchWrapper(OnOpenBaseFile));
+            OpenComp = new DelegateCommand(ExceptionCatchWrapper(OnOpenCompFile));
             Refresh = new DelegateCommand(ExceptionCatchWrapper(OnRefresh));
-            DoubleClick = new DelegateCommand<ComparisonRow>((row) => ExceptionCatchWrapper(() => OnDoubleClick(row))());
+            DoubleClick = new DelegateCommand<ComparisonRow>(ExceptionCatchWrapper<ComparisonRow>(OnDoubleClick));
             Exchange = new DelegateCommand(ExceptionCatchWrapper(OnExchange));
-            DropToBaseFile = new DelegateCommand<string>(p => ExceptionCatchWrapper(() => OnDropToBaseFile(p))());
-            DropToCompFile = new DelegateCommand<string>(p => ExceptionCatchWrapper(() => OnDropToCompFile(p))());
+            DropToBaseFile = new DelegateCommand<string>(ExceptionCatchWrapper<string>(ChangeBaseFile));
+            DropToCompFile = new DelegateCommand<string>(ExceptionCatchWrapper<string>(ChangeCompFile));
         }
 
         public void Dispose()
@@ -81,20 +83,8 @@ namespace ArchiveDiff.Ui
             {
                 _isDisposed = true;
                 _comparer.Dispose();
-                _settings.Save();
+                _settings.TrySave();
             }
-        }
-
-        public void OnDropToBaseFile(string path)
-        {
-            Rows = _comparer.ChangeBaseFile(path);
-            BaseHeader = $"{Path.GetFileName(path)}  [extracted: {_comparer.BasePath}]";
-        }
-
-        public void OnDropToCompFile(string path)
-        {
-            Rows = _comparer.ChangeCompFile(path);
-            CompHeader = $"{Path.GetFileName(path)}  [extracted: {_comparer.CompPath}]";
         }
 
         private void NotifyChanged([CallerMemberName] string name = "")
@@ -102,44 +92,60 @@ namespace ArchiveDiff.Ui
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private void ChangeBaseFile()
+        private void OnOpenBaseFile()
         {
             var path = SelectFileToOpen();
-            if (path == null)
-                return;
-
-            Rows = _comparer.ChangeBaseFile(path);
-            BaseHeader = $"{Path.GetFileName(path)}  [extracted: {_comparer.BasePath}]";
+            if (path != null)
+                ChangeBaseFile(path);
         }
 
-        private void ChangeCompFile()
+        private void OnOpenCompFile()
         {
             var path = SelectFileToOpen();
-            if (path == null)
-                return;
+            if (path != null)
+                ChangeCompFile(path);
+        }
 
+        private void ChangeBaseFile(string path)
+        {
+            Rows = _comparer.ChangeBaseFile(path);
+            UpdateColumnHeaders();
+        }
+
+        private void ChangeCompFile(string path)
+        {
             Rows = _comparer.ChangeCompFile(path);
-            CompHeader = $"{Path.GetFileName(path)}  [extracted: {_comparer.CompPath}]";
+            UpdateColumnHeaders();
         }
 
         private void OnRefresh()
         {
             Rows = _comparer.Refresh();
+            UpdateColumnHeaders();
+        }
 
-            if (!string.IsNullOrEmpty(_comparer.BasePath))
-                BaseHeader = $"{Path.GetFileName(_comparer.BaseArchive)}  [extracted: {_comparer.BasePath}]";
-            if (!string.IsNullOrEmpty(_comparer.CompPath))
-                CompHeader = $"{Path.GetFileName(_comparer.CompArchive)}  [extracted: {_comparer.CompPath}]";
+        private void OnDoubleClick(ComparisonRow row)
+        {
+            _comparer.RunProgram(DoubleClickProgram, DoubleClickProgramArguments, row);
         }
 
         private void OnExchange()
         {
-            var tmp = BaseHeader;
-            BaseHeader = CompHeader;
-            CompHeader = tmp;
-
             Rows = null;
             Rows = _comparer.Exchange();
+
+            UpdateColumnHeaders();
+        }
+
+        private void UpdateColumnHeaders()
+        {
+            BaseHeader = string.IsNullOrEmpty(_comparer.BasePath)
+                ? DefaultBaseHeader
+                : $"{Path.GetFileName(_comparer.BaseArchive)}  [extracted: {_comparer.BasePath}]";
+
+            CompHeader = string.IsNullOrEmpty(_comparer.CompPath)
+                ? DefaultCompHeader
+                : $"{Path.GetFileName(_comparer.CompArchive)}  [extracted: {_comparer.CompPath}]";
         }
 
         private string SelectFileToOpen()
@@ -152,17 +158,24 @@ namespace ArchiveDiff.Ui
 
         private Action ExceptionCatchWrapper(Action action)
         {
-            return () =>
+            return () => DoInsideTryCatch(action);
+        }
+
+        private Action<T> ExceptionCatchWrapper<T>(Action<T> action)
+        {
+            return param => DoInsideTryCatch(() => action(param));
+        }
+
+        private void DoInsideTryCatch(Action action)
+        {
+            try
             {
-                try
-                {
-                    action();
-                }
-                catch (Exception ex)
-                {
-                    HandleException(ex);
-                }
-            };
+                action();
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex);
+            }
         }
 
         private void HandleException(Exception ex, bool tryDisposing = true)
@@ -182,11 +195,6 @@ namespace ArchiveDiff.Ui
             }
 
             Application.Current.Shutdown();
-        }
-
-        private void OnDoubleClick(ComparisonRow row)
-        {
-            _comparer.RunProgram(DoubleClickProgram, DoubleClickProgramArguments, row);
         }
     }
 }

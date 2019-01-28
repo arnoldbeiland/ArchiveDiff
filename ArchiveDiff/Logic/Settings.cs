@@ -52,7 +52,7 @@ namespace ArchiveDiff.Logic
                         _current = (SettingsContainer)serializer.Deserialize(stream);
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // ignore
                 }
@@ -68,7 +68,7 @@ namespace ArchiveDiff.Logic
             }
         }
 
-        public void Save()
+        public void TrySave()
         {
             try
             {
@@ -81,7 +81,7 @@ namespace ArchiveDiff.Logic
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // ignore
             }

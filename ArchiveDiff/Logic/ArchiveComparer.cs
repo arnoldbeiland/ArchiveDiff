@@ -112,19 +112,19 @@ namespace ArchiveDiff.Logic
         {
             _comparisonState = new List<ComparisonRow>();
 
-            var baseList = new DirectoryTreeTraverser(BasePath).GetItems();
-            var compList = new DirectoryTreeTraverser(CompPath).GetItems();
+            var baseList = DirectoryTreeTraversal.GetItems(BasePath);
+            var compList = DirectoryTreeTraversal.GetItems(CompPath);
 
-            var baseEnumerator = new EnumeratorWithHasCurrent<DirectoryTreeTraverser.Item>(baseList.Skip(1).GetEnumerator());
-            var compEnumerator = new EnumeratorWithHasCurrent<DirectoryTreeTraverser.Item>(compList.Skip(1).GetEnumerator());
+            var baseEnumerator = new EnumeratorWithHasCurrent<DirectoryTreeTraversal.Item>(baseList.Skip(1).GetEnumerator());
+            var compEnumerator = new EnumeratorWithHasCurrent<DirectoryTreeTraversal.Item>(compList.Skip(1).GetEnumerator());
 
             while (baseEnumerator.HasCurrent || compEnumerator.HasCurrent)
                 GetNextComparisonRow(baseEnumerator, compEnumerator);
         }
 
         private void GetNextComparisonRow(
-            EnumeratorWithHasCurrent<DirectoryTreeTraverser.Item> baseEnumerator,
-            EnumeratorWithHasCurrent<DirectoryTreeTraverser.Item> compEnumerator)
+            EnumeratorWithHasCurrent<DirectoryTreeTraversal.Item> baseEnumerator,
+            EnumeratorWithHasCurrent<DirectoryTreeTraversal.Item> compEnumerator)
         {
             if (!baseEnumerator.HasCurrent)
             {
@@ -167,7 +167,7 @@ namespace ArchiveDiff.Logic
             }
         }
 
-        private void AddItem(DirectoryTreeTraverser.Item item, ComparisonState state)
+        private void AddItem(DirectoryTreeTraversal.Item item, ComparisonState state)
         {
             _comparisonState.Add(new ComparisonRow
             {
@@ -186,7 +186,7 @@ namespace ArchiveDiff.Logic
             return directory;
         }
 
-        private int CompareItems(DirectoryTreeTraverser.Item x, DirectoryTreeTraverser.Item y)
+        private int CompareItems(DirectoryTreeTraversal.Item x, DirectoryTreeTraversal.Item y)
         {
             var xp = x.Path;
             var yp = y.Path;

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ArchiveDiff.Logic
 {
-    public class DirectoryTreeTraverser
+    public static class DirectoryTreeTraversal
     {
         public class Item
         {
@@ -14,54 +14,46 @@ namespace ArchiveDiff.Logic
             public int IndentationLevel { get; set; }
         }
 
-        private string _path;
-        private List<Item> _items;
-
-        public DirectoryTreeTraverser(string path)
+        public static List<Item> GetItems(string path)
         {
-            _path = path;
+            var items = new List<Item>();
+
+            if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
+                Dfs(path, 0, items, path);
+
+            return items;
         }
 
-        public List<Item> GetItems()
+        private static void Dfs(string path, int indentationLevel, List<Item> items, string basePath)
         {
-            _items = new List<Item>();
-
-            if (!string.IsNullOrEmpty(_path) && Directory.Exists(_path))
-                Dfs(_path, 0);
-
-            return _items;
-        }
-
-        public void Dfs(string path, int indentationLevel)
-        {
-            _items.Add(new Item
+            items.Add(new Item
             {
                 Name = new DirectoryInfo(path).Name,
-                Path = RemovePrefix(path),
+                Path = RemovePrefix(path, basePath),
                 Type = ItemType.Directory,
                 IndentationLevel = indentationLevel
             });
 
             foreach (var dir in Directory.GetDirectories(path).OrderBy(x => x))
             {
-                Dfs(dir, indentationLevel + 1);
+                Dfs(dir, indentationLevel + 1, items, basePath);
             }
 
             foreach (var file in Directory.GetFiles(path))
             {
-                _items.Add(new Item
+                items.Add(new Item
                 {
                     Name = Path.GetFileName(file),
-                    Path = RemovePrefix(file),
+                    Path = RemovePrefix(file, basePath),
                     Type = ItemType.File,
                     IndentationLevel = indentationLevel + 1
                 });
             }
         }
 
-        public string RemovePrefix(string currentPath)
+        private static string RemovePrefix(string currentPath, string originalPath)
         {
-            return currentPath.Substring(_path.Length);
+            return currentPath.Substring(originalPath.Length);
         }
     }
 }
