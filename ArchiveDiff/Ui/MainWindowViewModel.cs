@@ -18,6 +18,8 @@ namespace ArchiveDiff.Ui
         public ICommand Refresh { get; set; }
         public ICommand DoubleClick { get; set; }
         public ICommand Exchange { get; set; }
+        public ICommand DropToBaseFile { get; set; }
+        public ICommand DropToCompFile { get; set; }
 
         private string _baseHeader = "Base"; 
         public string BaseHeader
@@ -69,6 +71,8 @@ namespace ArchiveDiff.Ui
             Refresh = new DelegateCommand(ExceptionCatchWrapper(OnRefresh));
             DoubleClick = new DelegateCommand<ComparisonRow>((row) => ExceptionCatchWrapper(() => OnDoubleClick(row))());
             Exchange = new DelegateCommand(ExceptionCatchWrapper(OnExchange));
+            DropToBaseFile = new DelegateCommand<string>(p => ExceptionCatchWrapper(() => OnDropToBaseFile(p))());
+            DropToCompFile = new DelegateCommand<string>(p => ExceptionCatchWrapper(() => OnDropToCompFile(p))());
         }
 
         public void Dispose()
@@ -79,6 +83,18 @@ namespace ArchiveDiff.Ui
                 _comparer.Dispose();
                 _settings.Save();
             }
+        }
+
+        public void OnDropToBaseFile(string path)
+        {
+            Rows = _comparer.ChangeBaseFile(path);
+            BaseHeader = $"{Path.GetFileName(path)}  [extracted: {_comparer.BasePath}]";
+        }
+
+        public void OnDropToCompFile(string path)
+        {
+            Rows = _comparer.ChangeCompFile(path);
+            CompHeader = $"{Path.GetFileName(path)}  [extracted: {_comparer.CompPath}]";
         }
 
         private void NotifyChanged([CallerMemberName] string name = "")

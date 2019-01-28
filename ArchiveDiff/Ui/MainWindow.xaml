@@ -46,7 +46,10 @@
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Rows}"
             AutoGenerateColumns="False"
-            CanUserAddRows="False">
+            CanUserAddRows="False"
+            AllowDrop="True"
+            Drop="DataGrid_Drop"
+            DragOver="Datagrid_DragOver">
             <DataGrid.Columns>
 
                 <DataGridTemplateColumn Width="*">
