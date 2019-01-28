@@ -49,7 +49,7 @@ namespace ArchiveDiff.Logic
                     using (var stream = File.Open(_filePath, FileMode.Open))
                     {
                         var serializer = new XmlSerializer(typeof(SettingsContainer));
-                        _current = (SettingsContainer)serializer.Deserialize(stream);
+                        //_current = (SettingsContainer)serializer.Deserialize(stream);
                     }
                 }
                 catch (Exception)

@@ -97,13 +97,14 @@ namespace ArchiveDiff.Logic
             BasePath = CompPath;
             CompPath = tmp;
 
-            foreach (var row in _comparisonState)
-            {
-                if (row.State == ComparisonState.Added)
-                    row.State = ComparisonState.Deleted;
-                else if (row.State == ComparisonState.Deleted)
-                    row.State = ComparisonState.Added;
-            }
+            if (_comparisonState != null)
+                foreach (var row in _comparisonState)
+                {
+                    if (row.State == ComparisonState.Added)
+                        row.State = ComparisonState.Deleted;
+                    else if (row.State == ComparisonState.Deleted)
+                        row.State = ComparisonState.Added;
+                }
 
             return _comparisonState;
         }
@@ -264,7 +265,6 @@ namespace ArchiveDiff.Logic
                         if (last != cstream.ReadByte())
                             return false;
                     }
-                   
                 }
             }
 

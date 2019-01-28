@@ -33,7 +33,8 @@
             <StackPanel Orientation="Vertical" Grid.Column="0" Margin="5,7" HorizontalAlignment="Center">
                 <Button Width="150" Command="{Binding OpenBase}">Open Base File</Button>
                 <StackPanel Margin="0,2,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button Width="60" Command="{Binding SaveBaseAs}" >Save As</Button>
+                    <Button Width="40" Command="{Binding FindInBase}">Find</Button>
+                    <Button Width="60" Margin="3,0,0,0" Command="{Binding SaveBaseAs}">Save As</Button>
                     <Button Width="30" Margin="3,0,0,0" Command="{Binding CloseBase}">X</Button>
                 </StackPanel> 
             </StackPanel>
@@ -46,7 +47,8 @@
             <StackPanel Orientation="Vertical" Grid.Column="2" Margin="5,7" HorizontalAlignment="Center">
                 <Button Width="150" Command="{Binding OpenComp}">Open File to Compare</Button>
                 <StackPanel Margin="0,2,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button Width="60" Command="{Binding SaveCompAs}" >Save As</Button>
+                    <Button Width="40" Command="{Binding FindInComp}">Find</Button>
+                    <Button Width="60" Margin="3,0,0,0" Command="{Binding SaveCompAs}">Save As</Button>
                     <Button Width="30" Margin="3,0,0,0" Command="{Binding CloseComp}">X</Button>
                 </StackPanel>
             </StackPanel>

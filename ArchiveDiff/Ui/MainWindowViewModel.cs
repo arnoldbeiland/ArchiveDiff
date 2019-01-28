@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -26,6 +27,8 @@ namespace ArchiveDiff.Ui
         public ICommand SaveCompAs { get; set; }
         public ICommand CloseBase { get; set; }
         public ICommand CloseComp { get; set; }
+        public ICommand FindInBase { get; set; }
+        public ICommand FindInComp { get; set; }
 
         private string _baseHeader = DefaultBaseHeader; 
         public string BaseHeader
@@ -65,6 +68,7 @@ namespace ArchiveDiff.Ui
         private bool _isDisposed;
         private ArchiveComparer _comparer;
         private Settings _settings;
+        private List<Window> _windowsToClose = new List<Window>();
 
         public MainWindowViewModel()
         {
@@ -83,6 +87,8 @@ namespace ArchiveDiff.Ui
             SaveCompAs = new DelegateCommand(ExceptionCatchWrapper(OnSaveCompAs));
             CloseBase = new DelegateCommand(ExceptionCatchWrapper(OnCloseBase));
             CloseComp = new DelegateCommand(ExceptionCatchWrapper(OnCloseComp));
+            FindInBase = new DelegateCommand(ExceptionCatchWrapper(OnFindInBase));
+            FindInComp = new DelegateCommand(ExceptionCatchWrapper(OnFindInComp));
         }
 
         public void Dispose()
@@ -92,6 +98,8 @@ namespace ArchiveDiff.Ui
                 _isDisposed = true;
                 _comparer.Dispose();
                 _settings.TrySave();
+                while (_windowsToClose.Count > 0)
+                    _windowsToClose[0].Close();
             }
         }
 
@@ -245,6 +253,37 @@ namespace ArchiveDiff.Ui
         {
             Rows = _comparer.CloseComp();
             UpdateColumnHeaders();
+        }
+
+        private void OnFindInBase()
+        {
+            var path = _comparer.BasePath;
+            var files = Rows
+                .Where(r => r.Type == ItemType.File)
+                .Select(r => path + r.RelativePath)
+                .ToList();
+
+            OpenFindWindow($"Find: {BaseHeader}", files);
+        }
+
+        private void OnFindInComp()
+        {
+            var path = _comparer.CompPath;
+            var files = Rows
+                .Where(r => r.Type == ItemType.File)
+                .Select(r => path + r.RelativePath)
+                .ToList();
+
+            OpenFindWindow($"Find: {CompHeader}", files);
+        }
+
+        private void OpenFindWindow(string title, List<string> files)
+        {
+            var window = new FindWindow(title, _settings.OpenerProgram, files);
+            window.Show();
+
+            _windowsToClose.Add(window);
+            window.Closed += (s, a) => _windowsToClose.Remove(window);
         }
     }
 }

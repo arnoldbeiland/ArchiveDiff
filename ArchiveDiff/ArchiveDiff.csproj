@@ -59,6 +59,10 @@
     </ApplicationDefinition>
     <Compile Include="Logic\Settings.cs" />
     <Compile Include="Ui\Converters.cs" />
+    <Page Include="Ui\FindWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Ui\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -72,6 +76,10 @@
     <Compile Include="Logic\EnumeratorWithHasCurrent.cs" />
     <Compile Include="Logic\ComparisonRow.cs" />
     <Compile Include="Ui\DelegateCommand.cs" />
+    <Compile Include="Ui\FindWindow.xaml.cs">
+      <DependentUpon>FindWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ui\FindWindowViewModel.cs" />
     <Compile Include="Ui\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
