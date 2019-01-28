@@ -57,6 +57,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Logic\Settings.cs" />
     <Compile Include="Ui\Converters.cs" />
     <Page Include="Ui\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

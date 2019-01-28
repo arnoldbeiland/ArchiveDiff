@@ -40,29 +40,29 @@ namespace ArchiveDiff.Ui
             set { _rows = value; NotifyChanged(); }
         }
 
-        private string _doubleClickProgram = @"C:\Program Files\Notepad++\notepad++.exe";
         public string DoubleClickProgram
         {
-            get => _doubleClickProgram;
-            set { _doubleClickProgram = value; NotifyChanged(); }
+            get => _settings.OpenerProgram;
+            set { _settings.OpenerProgram = value; NotifyChanged(); }
         }
 
-        private string _doubleClickProgramArguments = @"{0} {1}";
         public string DoubleClickProgramArguments
         {
-            get => _doubleClickProgramArguments;
-            set { _doubleClickProgramArguments = value; NotifyChanged(); }
+            get => _settings.AttributeFormat;
+            set { _settings.AttributeFormat = value; NotifyChanged(); }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         private bool _isDisposed;
         private ArchiveComparer _comparer;
+        private Settings _settings;
 
         public MainWindowViewModel()
         {
             _comparer = new ArchiveComparer();
             _rows = new List<ComparisonRow>();
+            _settings = new Settings();
 
             OpenBase = new DelegateCommand(ExceptionCatchWrapper(ChangeBaseFile));
             OpenComp = new DelegateCommand(ExceptionCatchWrapper(ChangeCompFile));
@@ -77,6 +77,7 @@ namespace ArchiveDiff.Ui
             {
                 _isDisposed = true;
                 _comparer.Dispose();
+                _settings.Save();
             }
         }
 
