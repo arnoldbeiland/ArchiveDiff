@@ -24,6 +24,8 @@ namespace ArchiveDiff.Ui
         public ICommand DropToCompFile { get; set; }
         public ICommand SaveBaseAs { get; set; }
         public ICommand SaveCompAs { get; set; }
+        public ICommand CloseBase { get; set; }
+        public ICommand CloseComp { get; set; }
 
         private string _baseHeader = DefaultBaseHeader; 
         public string BaseHeader
@@ -79,6 +81,8 @@ namespace ArchiveDiff.Ui
             DropToCompFile = new DelegateCommand<string>(ExceptionCatchWrapper<string>(ChangeCompFile));
             SaveBaseAs = new DelegateCommand(ExceptionCatchWrapper(OnSaveBaseAs));
             SaveCompAs = new DelegateCommand(ExceptionCatchWrapper(OnSaveCompAs));
+            CloseBase = new DelegateCommand(ExceptionCatchWrapper(OnCloseBase));
+            CloseComp = new DelegateCommand(ExceptionCatchWrapper(OnCloseComp));
         }
 
         public void Dispose()
@@ -229,6 +233,18 @@ namespace ArchiveDiff.Ui
             dialog.ShowDialog();
 
             return string.IsNullOrEmpty(dialog.FileName) ? null : dialog.FileName;
+        }
+
+        private void OnCloseBase()
+        {
+            Rows = _comparer.CloseBase();
+            UpdateColumnHeaders();
+        }
+
+        private void OnCloseComp()
+        {
+            Rows = _comparer.CloseComp();
+            UpdateColumnHeaders();
         }
     }
 }

@@ -118,6 +118,34 @@ namespace ArchiveDiff.Logic
             ZipFile.CreateFromDirectory(CompPath, toPath);
         }
 
+        public List<ComparisonRow> CloseBase()
+        {
+            if (!string.IsNullOrEmpty(BasePath))
+            {
+                Directory.Delete(BasePath, true);
+                BasePath = null;
+                BaseArchive = null;
+            }
+
+            RunComparison();
+
+            return _comparisonState;
+        }
+
+        public List<ComparisonRow> CloseComp()
+        {
+            if (!string.IsNullOrEmpty(CompPath))
+            {
+                Directory.Delete(CompPath, true);
+                CompPath = null;
+                CompArchive = null;
+            }
+
+            RunComparison();
+
+            return _comparisonState;
+        }
+
         private void RunComparison()
         {
             _comparisonState = new List<ComparisonRow>();
