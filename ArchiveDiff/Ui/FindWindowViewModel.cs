@@ -75,7 +75,7 @@ namespace ArchiveDiff.Ui
             {
                 try
                 {
-                    if (File.ReadLines(file).Any(line => line.Contains(SearchString.ToLower())))
+                    if (File.ReadLines(file).Select(l => l.ToLower()).Any(line => line.Contains(SearchString.ToLower())))
                         result.Add(file);
                 }
                 catch (Exception) { /* ignore */ }
