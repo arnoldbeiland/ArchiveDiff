@@ -30,8 +30,9 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="5,7" HorizontalAlignment="Center">
+            <StackPanel Orientation="Vertical" Grid.Column="0" Margin="5,7" HorizontalAlignment="Center">
                 <Button Width="150" Command="{Binding OpenBase}">Open Base File</Button>
+                <Button Width="60" Margin="0,2,0,0" Command="{Binding SaveBaseAs}" HorizontalAlignment="Right">Save As</Button>
             </StackPanel>
 
             <StackPanel Margin="0,7" Grid.Column="1" Orientation="Vertical">
@@ -39,8 +40,9 @@
                 <Button Margin="0,1" ToolTip="Exchange" Command="{Binding Exchange}">&lt;-&gt;</Button>
             </StackPanel>
             
-            <StackPanel Orientation="Horizontal" Grid.Column="2" Margin="5,7" HorizontalAlignment="Center">
+            <StackPanel Orientation="Vertical" Grid.Column="2" Margin="5,7" HorizontalAlignment="Center">
                 <Button Width="150" Command="{Binding OpenComp}">Open File to Compare</Button>
+                <Button Width="60" Margin="0,2,0,0" Command="{Binding SaveCompAs}" HorizontalAlignment="Right">Save As</Button>
             </StackPanel>
         </Grid>
 
@@ -120,6 +122,10 @@
                     <EventSetter Event="MouseDoubleClick" Handler="DataGridRow_MouseDoubleClick"/>
                 </Style>
             </DataGrid.RowStyle>
+
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightBlue"/>
+            </DataGrid.Resources>
         </DataGrid>
 
         <Grid Grid.Row="4" Margin="5">

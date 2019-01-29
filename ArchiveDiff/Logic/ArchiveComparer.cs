@@ -108,6 +108,16 @@ namespace ArchiveDiff.Logic
             return _comparisonState;
         }
 
+        public void SaveBaseAs(string toPath)
+        {
+            ZipFile.CreateFromDirectory(BasePath, toPath);
+        }
+
+        public void SaveCompAs(string toPath)
+        {
+            ZipFile.CreateFromDirectory(CompPath, toPath);
+        }
+
         private void RunComparison()
         {
             _comparisonState = new List<ComparisonRow>();

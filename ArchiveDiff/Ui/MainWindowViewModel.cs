@@ -22,6 +22,8 @@ namespace ArchiveDiff.Ui
         public ICommand Exchange { get; set; }
         public ICommand DropToBaseFile { get; set; }
         public ICommand DropToCompFile { get; set; }
+        public ICommand SaveBaseAs { get; set; }
+        public ICommand SaveCompAs { get; set; }
 
         private string _baseHeader = DefaultBaseHeader; 
         public string BaseHeader
@@ -75,6 +77,8 @@ namespace ArchiveDiff.Ui
             Exchange = new DelegateCommand(ExceptionCatchWrapper(OnExchange));
             DropToBaseFile = new DelegateCommand<string>(ExceptionCatchWrapper<string>(ChangeBaseFile));
             DropToCompFile = new DelegateCommand<string>(ExceptionCatchWrapper<string>(ChangeCompFile));
+            SaveBaseAs = new DelegateCommand(ExceptionCatchWrapper(OnSaveBaseAs));
+            SaveCompAs = new DelegateCommand(ExceptionCatchWrapper(OnSaveCompAs));
         }
 
         public void Dispose()
@@ -195,6 +199,36 @@ namespace ArchiveDiff.Ui
             }
 
             Application.Current.Shutdown();
+        }
+
+        private void OnSaveBaseAs()
+        {
+            var path = SaveFileDialog(
+                Path.GetFileNameWithoutExtension(_comparer.BaseArchive)
+                + "_modified"
+                + Path.GetExtension(_comparer.BaseArchive));
+
+            if (path != null)
+                _comparer.SaveBaseAs(path);
+        }
+
+        private void OnSaveCompAs()
+        {
+            var path = SaveFileDialog(
+                Path.GetFileNameWithoutExtension(_comparer.CompArchive)
+                + "_modified"
+                + Path.GetExtension(_comparer.CompArchive));
+
+            if (path != null)
+                _comparer.SaveCompAs(path);
+        }
+
+        private string SaveFileDialog(string suggestedName)
+        {
+            var dialog = new SaveFileDialog { FileName = suggestedName };
+            dialog.ShowDialog();
+
+            return string.IsNullOrEmpty(dialog.FileName) ? null : dialog.FileName;
         }
     }
 }
